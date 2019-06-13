@@ -1,0 +1,40 @@
+--- a/grub-core/normal/menu.c	2019-06-12 20:35:00.000000000 -0700
++++ b/grub-core/normal/menu.c	2019-06-12 21:10:38.180400885 -0700
+@@ -574,14 +574,15 @@
+    entry to be executed is a result of an automatic default selection because
+    of the timeout.  */
+ static int
+-run_menu (grub_menu_t menu, int nested, int *auto_boot)
++run_menu (grub_menu_t menu, int nested, int *auto_boot, int default_entry)
+ {
+   grub_uint64_t saved_time;
+-  int default_entry, current_entry;
++  int current_entry;
+   int timeout;
+   enum timeout_style timeout_style;
+ 
+-  default_entry = get_entry_number (menu, "default");
++  if (default_entry < 0)
++    default_entry = get_entry_number (menu, "default");
+ 
+   /* If DEFAULT_ENTRY is not within the menu entries, fall back to
+      the first entry.  */
+@@ -904,16 +905,16 @@
+ static grub_err_t
+ show_menu (grub_menu_t menu, int nested, int autobooted)
+ {
++  int boot_entry = -1;
+   while (1)
+     {
+-      int boot_entry;
+       grub_menu_entry_t e;
+       int auto_boot;
+ #ifdef QUIET_BOOT
+       int initial_timeout = grub_menu_get_timeout ();
+ #endif
+ 
+-      boot_entry = run_menu (menu, nested, &auto_boot);
++      boot_entry = run_menu (menu, nested, &auto_boot, boot_entry);
+       if (boot_entry < 0)
+ 	break;
+ 
